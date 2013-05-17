@@ -21,6 +21,7 @@ venv
 
 # Installer logs
 pip-log.txt
+access_log
 
 # Unit test / coverage reports
 .coverage

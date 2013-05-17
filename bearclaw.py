@@ -1,6 +1,6 @@
+#!/usr/bin/python
 import serial
-import re, sys, signal
-from time import sleep
+import re, sys, signal, os, time
 import RPi.GPIO as GPIO
 from couchdbkit import *
 
@@ -21,6 +21,7 @@ CARDS = [
 '6A003E61AC99', # Marla Jo card
 '6A003E247E0E', # Kathy card
 '6A003E77BD9E', # Kevin card
+'', # Levi card
 ]
 
 # Lock the door on boot
@@ -36,7 +37,7 @@ def signal_handler(signal, frame):
 def unlock_door(duration):
   print "Unlocking door for %d seconds" % duration
   GPIO.output(7, GPIO.LOW)
-  sleep(duration)
+  time.sleep(duration)
   print "Locking the door"
   GPIO.output(7, GPIO.HIGH)
 
@@ -44,23 +45,33 @@ signal.signal(signal.SIGINT, signal_handler)
 
 ser = serial.Serial('/dev/ttyUSB0', BITRATE, timeout=0)
 rfidPattern = re.compile(b'[\W_]+')
+buffer = ''
 
 while True:
   # Read data from RFID reader
-  s = ser.read(ser.inWaiting())
-  if len(s) > 0:
-    match = rfidPattern.sub('', s)
+  buffer = buffer + ser.read(ser.inWaiting())
+  if '\n' in buffer:
+    lines = buffer.split('\n')
+    last_received = lines[-2]
+    match = rfidPattern.sub('', last_received)
+
     if match:
       print match
       if match in CARDS:
         print 'card authorized'
+        with open('/opt/bearclaw/access_log', 'a') as f:
+          f.write('%s::%s\n' % (time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime()), match))
       	unlock_door(10)
       else:
         print 'unauthorized card'
+
+    # Clear buffer
+    buffer = ''
+    lines = ''
 
   # Listen for Exit Button input
   if not GPIO.input(3):
     print "button pressed"
     unlock_door(5)
 
-  sleep(0.1)
+  time.sleep(0.1)
