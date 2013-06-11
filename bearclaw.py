@@ -12,16 +12,16 @@ GPIO.setup(7, GPIO.OUT)
 GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 CARDS = [
-'060090840715', # Matt card
-'840034BD3E33', # Matt fob
-'6A003E3A2C42', # Suzy card
-'840034D5DDB8', # Suzy fob
-'6A003E6F556E', # Paul card
-'840034CD324F', # Paul fob
-'6A003E61AC99', # Marla Jo card
-'6A003E247E0E', # Kathy card
-'6A003E77BD9E', # Kevin card
-'', # Levi card
+'060090840715', # Matt Gorecki card
+'840034BD3E33', # Matt Gorecki fob
+'6A003E3A2C42', # Suzy Williams card
+'840034D5DDB8', # Suzy Williams fob
+'6A003E6F556E', # Paul Williams card
+'840034CD324F', # Paul Williams fob
+'6A003E61AC99', # Marla Jo Gorecki card
+'6A003E247E0E', # Kathy Carrette card
+'6A003E77BD9E', # Kevin Hamm card
+'6A003E7BB19E', # Grant Austin card
 ]
 
 # Lock the door on boot
@@ -60,10 +60,12 @@ while True:
       if match in CARDS:
         print 'card authorized'
         with open('/opt/bearclaw/access_log', 'a') as f:
-          f.write('%s::%s\n' % (time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime()), match))
+          f.write('%s::%s::authorized\n' % (time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime()), match))
       	unlock_door(10)
       else:
         print 'unauthorized card'
+        with open('/opt/bearclaw/error_log', 'a') as f:
+          f.write('%s::%s::unauthorized\n' % (time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime()), match))
 
     # Clear buffer
     buffer = ''
