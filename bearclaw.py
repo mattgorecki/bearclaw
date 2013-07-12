@@ -28,7 +28,6 @@ CARDS = [
 '6A003E61AC99', # Marla Jo Gorecki card
 '6A003E247E0E', # Kathy Carrette card
 '6A003E77BD9E', # Kevin Hamm card
-'6A003E7BB19E', # Grant Austin card
 ]
 
 def signal_handler(signal, frame):
