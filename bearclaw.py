@@ -4,7 +4,6 @@ import re, sys, signal, os, time
 import RPi.GPIO as GPIO
 import daemon
 import daemon.pidfile
-from couchdbkit import *
 
 print "Welcome to the Bearclaw.py"
 
@@ -28,6 +27,7 @@ CARDS = [
 '6A003E61AC99', # Marla Jo Gorecki card
 '6A003E247E0E', # Kathy Carrette card
 '6A003E77BD9E', # Kevin Hamm card
+'840034D6CEA8', # Ryan Carsten fob
 ]
 
 def signal_handler(signal, frame):
