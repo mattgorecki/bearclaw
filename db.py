@@ -17,12 +17,25 @@ class Member(Document):
   signup_date = DateTimeProperty()
   expiration_date = DateTimeProperty()
 
+class Location(Document):
+  name = StringProperty()
+
+class Door(Document):
+  name = StringProperty()
+
+class Log(Document):
+  event = StringProperty()
+  key_id = StringProperty()
+  door_id = StringProperty()
+  event_date = DateTimeProperty()
+
 AccessMethod.set_db(db)
 Member.set_db(db)
+Log.set_db(db)
 
-"""
 designer.pushapps('_design', db)
 
+"""
 access = AccessMethod(
   key_type = 'rfid',
   key_id = str(random.randint(1000000000, 9999999999)),

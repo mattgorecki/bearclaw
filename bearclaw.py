@@ -1,9 +1,10 @@
 #!/usr/bin/python2
 import serial
-import re, sys, signal, os, time
+import re, sys, signal, os, time, datetime
 import RPi.GPIO as GPIO
 import daemon
 import daemon.pidfile
+import db
 
 print "Welcome to the Bearclaw.py"
 
@@ -45,7 +46,7 @@ def unlock_door(duration):
   GPIO.output(7, GPIO.HIGH)
 
 if __name__ == '__main__':
-  with daemon.DaemonContext(pidfile=pidfile, working_directory='/opt/bearclaw'):
+  #with daemon.DaemonContext(pidfile=pidfile, working_directory='/opt/bearclaw'):
     buffer = ''
     ser = serial.Serial('/dev/ttyUSB0', BITRATE, timeout=0)
     rfidPattern = re.compile(b'[\W_]+')
@@ -63,13 +64,19 @@ if __name__ == '__main__':
           print match
           if match in CARDS:
             print 'card authorized'
-            with open('/opt/bearclaw/access_log', 'a') as f:
-              f.write('%s::%s::authorized\n' % (time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime()), match))
             unlock_door(10)
+            db.Log(
+              event = "authorized",
+              key_id = match,
+              event_time = datetime.datetime.now()
+            ).save()
           else:
             print 'unauthorized card'
-            with open('/opt/bearclaw/error_log', 'a') as f:
-              f.write('%s::%s::unauthorized\n' % (time.strftime("%a, %d %b %Y %H:%M:%S %z", time.gmtime()), match))
+            db.Log(
+              event = "unauthorized",
+              key_id = match,
+              event_time = datetime.datetime.now()
+            ).save()
 
         # Clear buffer
         buffer = ''
@@ -79,5 +86,10 @@ if __name__ == '__main__':
       if not GPIO.input(3):
         print "button pressed"
         unlock_door(5)
+        db.Log(
+          event = "exit_button",
+          key_id = "exit_button",
+          event_time = datetime.datetime.now()
+        ).save()
 
       time.sleep(0.1)
